@@ -3,13 +3,154 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Redis Auth API</title>
+    <title>Akereliuk - Redis Auth System</title>
     <link href="./output.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100 flex items-center justify-center h-screen">
-    <div class="bg-white p-8 rounded shadow-md">
-        <h1 class="text-2xl font-bold text-blue-600 mb-4">Auth System Ready</h1>
-        <p class="text-gray-700">Redis and Tailwind are configured.</p>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center font-sans">
+
+    <div class="w-full max-w-md bg-white rounded-xl shadow-lg overflow-hidden p-8 space-y-6">
+        
+        <div class="text-center">
+            <h1 class="text-3xl font-bold text-gray-800">Welcome</h1>
+            <p class="text-gray-500 mt-2">Secure Authentication with Redis</p>
+        </div>
+
+        <div class="flex bg-gray-200 p-1 rounded-lg">
+            <button id="toggleLogin" onclick="switchTab('login')" class="flex-1 py-2 rounded-md text-sm font-medium transition-all shadow-sm bg-white text-gray-800">Login</button>
+            <button id="toggleRegister" onclick="switchTab('register')" class="flex-1 py-2 rounded-md text-sm font-medium transition-all text-gray-600 hover:text-gray-800">Register</button>
+        </div>
+
+        <div id="alertBox" class="hidden p-4 rounded-md text-sm border">
+            <span id="alertMessage"></span>
+        </div>
+
+        <form id="loginForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Username</label>
+                <input type="text" id="loginUser" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Password</label>
+                <input type="password" id="loginPass" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Sign In
+            </button>
+        </form>
+
+        <form id="registerForm" class="space-y-4 hidden">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Choose Username</label>
+                <input type="text" id="regUser" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Choose Password</label>
+                <input type="password" id="regPass" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+                <p class="text-xs text-gray-400 mt-1">Must be 8+ chars, 1 uppercase, 1 number, 1 special char.</p>
+            </div>
+            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                Create Account
+            </button>
+        </form>
+
     </div>
+
+    <script>
+        function switchTab(tab) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const loginBtn = document.getElementById('toggleLogin');
+            const regBtn = document.getElementById('toggleRegister');
+            const alertBox = document.getElementById('alertBox');
+
+            alertBox.classList.add('hidden');
+
+            if (tab === 'login') {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                
+                loginBtn.classList.add('bg-white', 'shadow-sm', 'text-gray-800');
+                loginBtn.classList.remove('text-gray-600');
+                
+                regBtn.classList.remove('bg-white', 'shadow-sm', 'text-gray-800');
+                regBtn.classList.add('text-gray-600');
+            } else {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+
+                regBtn.classList.add('bg-white', 'shadow-sm', 'text-gray-800');
+                regBtn.classList.remove('text-gray-600');
+
+                loginBtn.classList.remove('bg-white', 'shadow-sm', 'text-gray-800');
+                loginBtn.classList.add('text-gray-600');
+            }
+        }
+
+        function showAlert(message, isError) {
+            const box = document.getElementById('alertBox');
+            const msg = document.getElementById('alertMessage');
+            
+            box.classList.remove('hidden', 'bg-red-50', 'text-red-800', 'border-red-200', 'bg-green-50', 'text-green-800', 'border-green-200');
+            
+            if (isError) {
+                box.classList.add('bg-red-50', 'text-red-800', 'border-red-200');
+            } else {
+                box.classList.add('bg-green-50', 'text-green-800', 'border-green-200');
+            }
+
+            msg.innerText = message;
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('regUser').value;
+            const password = document.getElementById('regPass').value;
+
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    const errorMsg = data.details ? data.details[0].msg : data.error;
+                    showAlert(errorMsg || 'Registration failed', true);
+                } else {
+                    showAlert('Account created! Please log in.', false);
+                    setTimeout(() => switchTab('login'), 1500);
+                }
+            } catch (err) {
+                showAlert('Connection error. Is the server running?', true);
+            }
+        });
+
+        // Handle Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('loginUser').value;
+            const password = document.getElementById('loginPass').value;
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    showAlert(data.error || 'Login failed', true);
+                } else {
+                    showAlert('Success! Token received.', false);
+                }
+            } catch (err) {
+                showAlert('Connection error. Is the server running?', true);
+            }
+        });
+    </script>
 </body>
 </html>
