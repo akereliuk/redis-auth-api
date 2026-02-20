@@ -1,0 +1,28 @@
+{
+  "name": "redis-auth-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/app.js",
+    "build:css": "npx @tailwindcss/cli -i ./src/public/styles.css -o ./src/public/output.css --watch",
+    "dev": "concurrently \"npm run build:css\" \"nodemon src/app.js\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@tailwindcss/cli": "^4.2.0",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "express-validator": "^7.3.1",
+    "helmet": "^8.1.0",
+    "redis": "^5.11.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "tailwindcss": "^4.2.0"
+  }
+}
