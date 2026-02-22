@@ -7,21 +7,26 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Security Middleware
-app.use(helmet()); // Sets various HTTP headers for security
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        "default-src": ["'self'"],
+        "script-src": ["'self'", "'unsafe-inline'"],
+        "script-src-attr": ["'unsafe-inline'"],
+        "style-src": ["'self'", "'unsafe-inline'"],
+        "img-src": ["'self'", "data:"],
+      },
+    },
+  })
+);
 
-// Parsers
-app.use(express.json()); // Allows parsing JSON bodies
+app.use(express.json());
 
-// Serve Static Files (Your Tailwind Frontend)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// API Routes
 app.use('/api/auth', authRoutes);
 
-// FUTURE DEVELOPMENT: Add Rate Limiting middleware here to prevent brute-force attacks.
-
-// Start Server
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });

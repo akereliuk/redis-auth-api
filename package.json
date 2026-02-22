@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/app.js",
     "build:css": "tailwindcss -i ./src/public/styles.css -o ./src/public/output.css --watch",
-    "dev": "concurrently \"npm run build:css\" \"npx nodemon src/app.js\""
+    "dev": "concurrently \"npm run build:css\" \"npx nodemon src/app.js\"",
+    "test": "npx cross-env NODE_ENV=test npx jest --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
@@ -22,6 +22,11 @@
   },
   "devDependencies": {
     "concurrently": "^9.2.1",
+    "cross-env": "^10.1.0",
+    "supertest": "^7.2.2",
     "tailwindcss": "^3.4.19"
+  },
+  "jest": {
+    "testEnvironment": "node"
   }
 }
