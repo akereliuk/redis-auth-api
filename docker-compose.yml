@@ -1,0 +1,24 @@
+services:
+  # Service 1: The Redis Database
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # Service 2: Your Node.js API
+  api:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      # NOTICE: We use 'redis' as the hostname, matching the service name above
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+
+# Persist Redis data so it doesn't vanish when restarting
+volumes:
+  redis_data:
